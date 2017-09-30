@@ -1,28 +1,22 @@
 class DevelopersController < ApplicationController
-  before_action :set_developer, only: [:show, :edit, :update, :destroy]
+  before_action :set_developer, only: %i[show edit update destroy]
 
-  # GET /developers
-  # GET /developers.json
   def index
     @developers = Developer.all
   end
 
-  # GET /developers/1
-  # GET /developers/1.json
   def show
+    @developer = Developer.find(params[:id])
   end
 
-  # GET /developers/new
   def new
     @developer = Developer.new
   end
 
-  # GET /developers/1/edit
   def edit
+    @developer = Developer.find(params[:id])
   end
 
-  # POST /developers
-  # POST /developers.json
   def create
     @developer = Developer.new(developer_params)
 
@@ -37,8 +31,6 @@ class DevelopersController < ApplicationController
     end
   end
 
-  # PATCH/PUT /developers/1
-  # PATCH/PUT /developers/1.json
   def update
     respond_to do |format|
       if @developer.update(developer_params)
@@ -51,8 +43,6 @@ class DevelopersController < ApplicationController
     end
   end
 
-  # DELETE /developers/1
-  # DELETE /developers/1.json
   def destroy
     @developer.destroy
     respond_to do |format|
@@ -62,13 +52,12 @@ class DevelopersController < ApplicationController
   end
 
   private
-    # Use callbacks to share common setup or constraints between actions.
-    def set_developer
-      @developer = Developer.find(params[:id])
-    end
 
-    # Never trust parameters from the scary internet, only allow the white list through.
-    def developer_params
-      params.fetch(:developer, {})
-    end
+  def set_developer
+    @developer = Developer.find(params[:id])
+  end
+
+  def developer_params
+    params.fetch(params.require(:developer).permit(:name, :email, :id, projects_attributes: %i[name description], time_entries_attributes: %i[entry date_field], developers_projects_attributes: [:developer_id]))
+  end
 end

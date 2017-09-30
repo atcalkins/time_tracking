@@ -1,74 +1,47 @@
 class TimeCardsController < ApplicationController
-  before_action :set_time_card, only: [:show, :edit, :update, :destroy]
+  before_action only: %i[index edit destroy]
 
-  # GET /time_cards
-  # GET /time_cards.json
   def index
-    @time_cards = TimeCard.all
+    @developer = Developer.find(params[:developer_id])
+    @time_Cards = @developer.time_Cards
   end
 
-  # GET /time_cards/1
-  # GET /time_cards/1.json
   def show
+    @time_card = TimeCard.find(params[:id])
+    @developer = current_developer
   end
 
-  # GET /time_cards/new
   def new
     @time_card = TimeCard.new
+    @developer = current_developer
   end
 
-  # GET /time_cards/1/edit
   def edit
+    @developer = Developer.find(params[:developer_id])
+    @time_card = TimeCard.find(params[:id])
   end
 
-  # POST /time_cards
-  # POST /time_cards.json
   def create
-    @time_card = TimeCard.new(time_card_params)
-
-    respond_to do |format|
-      if @time_card.save
-        format.html { redirect_to @time_card, notice: 'Time card was successfully created.' }
-        format.json { render :show, status: :created, location: @time_card }
-      else
-        format.html { render :new }
-        format.json { render json: @time_card.errors, status: :unprocessable_entity }
-      end
+    @developer = Developer.find(params[:developer_id])
+    @time_card = @developer.time_Cards.build(time_card_params)
+    if @time_card.save
+      redirect_to developer_time_card_path(@developer, @time_card)
+    else
+      render 'new'
     end
   end
 
-  # PATCH/PUT /time_cards/1
-  # PATCH/PUT /time_cards/1.json
-  def update
-    respond_to do |format|
-      if @time_card.update(time_card_params)
-        format.html { redirect_to @time_card, notice: 'Time card was successfully updated.' }
-        format.json { render :show, status: :ok, location: @time_card }
-      else
-        format.html { render :edit }
-        format.json { render json: @time_card.errors, status: :unprocessable_entity }
-      end
-    end
-  end
-
-  # DELETE /time_cards/1
-  # DELETE /time_cards/1.json
   def destroy
-    @time_card.destroy
+    @developer = Developer.find(params[:developer_id])
+    @time_card = TimeCard.destroy(params[:id])
     respond_to do |format|
-      format.html { redirect_to time_cards_url, notice: 'Time card was successfully destroyed.' }
-      format.json { head :no_content }
+      format.html { redirect_to developer_time_Cards_path(@developer) }
     end
   end
 
   private
-    # Use callbacks to share common setup or constraints between actions.
-    def set_time_card
-      @time_card = TimeCard.find(params[:id])
-    end
 
-    # Never trust parameters from the scary internet, only allow the white list through.
-    def time_card_params
-      params.fetch(:time_card, {})
-    end
+  def time_card_params
+    params.require(:time_card).permit(:entry, :date_field, :developer_id, :project_id, projects_attributes: %i[name description], developers_attributes: %i[id name email], developers_projects_attributes: %i[developer_id project_id])
+  end
 end
